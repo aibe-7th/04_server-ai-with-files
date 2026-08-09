@@ -42,8 +42,17 @@ public class ImageSearchService {
 
         return documents.stream().map(doc -> {
             String key = (String) doc.getMetadata().get("objectKey");
+
+            /*
+             * [S3 퍼블릭 버킷 전용 직접 URL 방식 흔적]
+             * String publicUrl = objectStorageService.getUrl(key);
+             */
+
+            // 자체 컨트롤러(프록시) 방식 URL 생성 (비공개 버킷 보안 지원)
+            String proxyUrl = "/media/download?key=%s".formatted(key);
+
             return new ImageSearchResult(
-                    objectStorageService.getUrl(key),
+                    proxyUrl,
                     (String) doc.getMetadata().get("caption"),
                     (String) doc.getMetadata().get("ocrText"),
                     doc.getScore()

@@ -33,13 +33,24 @@ public class ObjectStorageService {
     }
 
     /**
-     * S3 다운로드 URL 조회
+     * S3 퍼블릭 다운로드 URL 조회 (퍼블릭 버킷 전용)
      */
     public String getUrl(String key) {
         try {
             return s3Template.download(storageProperties.bucket(), key).getURL().toString();
         } catch (Exception e) {
             throw new RuntimeException("S3 URL 조회 실패: %s".formatted(e.getMessage()));
+        }
+    }
+
+    /**
+     * 자체 컨트롤러(프록시)용 S3 객체 자원 다운로드
+     */
+    public InputStream downloadStream(String key) {
+        try {
+            return s3Template.download(storageProperties.bucket(), key).getInputStream();
+        } catch (Exception e) {
+            throw new RuntimeException("S3 스트림 다운로드 실패: %s".formatted(e.getMessage()));
         }
     }
 }

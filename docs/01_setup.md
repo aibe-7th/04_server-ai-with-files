@@ -15,6 +15,7 @@
 | Config | `global/config/AiProperties.java` | `app.ai` 프로퍼티 바인딩 Record |
 | Config | `global/config/StorageProperties.java` | `app.storage` 프로퍼티 바인딩 Record |
 | Storage | `global/storage/ObjectStorageService.java` | S3 파일 업로드/다운로드/삭제 서비스 |
+| Storage | `global/storage/MediaDownloadController.java` | 자체 프록시 다운로드 컨트롤러 |
 | Exception | `global/error/GlobalExceptionHandler.java` | 공통 예외 처리기 |
 | Controller | `domain/home/HomeController.java` | 홈 화면 연결 컨트롤러 |
 | View | `templates/home.html` | 메인 내비게이션 홈 화면 |
@@ -186,6 +187,36 @@ public class ObjectStorageService {
         } catch (Exception e) {
             throw new RuntimeException("S3 URL 조회 실패: %s".formatted(e.getMessage()));
         }
+    }
+
+    public InputStream downloadStream(String key) {
+        try {
+            return s3Template.download(storageProperties.bucket(), key).getInputStream();
+        } catch (Exception e) {
+            throw new RuntimeException("S3 스트림 다운로드 실패: %s".formatted(e.getMessage()));
+        }
+    }
+}
+```
+
+#### `MediaDownloadController.java`
+```java
+// [Step 0-4] S3 퍼블릭 URL 대신 자체 컨트롤러(프록시) 방식으로 미디어를 내려주는 다운로드 컨트롤러
+@RestController
+@RequiredArgsConstructor
+public class MediaDownloadController {
+
+    private final ObjectStorageService objectStorageService;
+
+    @GetMapping("/media/download")
+    public ResponseEntity<InputStreamResource> downloadMedia(@RequestParam("key") String key) {
+        InputStream inputStream = objectStorageService.downloadStream(key);
+        InputStreamResource resource = new InputStreamResource(inputStream);
+
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"%s\"".formatted(key))
+                .contentType(MediaType.IMAGE_JPEG)
+                .body(resource);
     }
 }
 ```
