@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Image RAG</title>
+</head>
+<body>
+    <a th:href="@{/}">← 홈</a>
+    <h1>2부: Image RAG</h1>
+
+    <div style="display: flex; flex-direction: column; gap: 20px;">
+        <!-- 업로드 -->
+        <form th:action="@{/image-rag/upload}" method="post" enctype="multipart/form-data">
+            <input type="file" name="file" accept="image/*" required />
+            <button type="submit">이미지 업로드</button>
+        </form>
+        <p th:if="${message}" th:text="${message}" style="color: green;"></p>
+        <p th:if="${error}" th:text="${error}" style="color: red;"></p>
+
+        <!-- 검색 -->
+        <form th:action="@{/image-rag/search}" method="post">
+            <input type="text" name="query" placeholder="검색어 입력 (예: 간판 이름)" required />
+            <button type="submit">이미지 검색</button>
+        </form>
+
+        <!-- 결과 목록 -->
+        <div th:if="${results}" style="display: flex; flex-wrap: wrap; gap: 10px;">
+            <div th:each="item : ${results}" style="border: 1px solid #ccc; padding: 10px; width: 200px;">
+                <img th:src="${item.url}" style="width: 100%; height: auto;" />
+                <p th:text="${item.caption}"></p>
+                <small th:text="${item.ocrText}"></small>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

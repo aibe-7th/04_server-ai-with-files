@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>이미지 생성</title>
+</head>
+<body>
+    <a th:href="@{/}">← 홈</a>
+    <h1>3부: FLUX 이미지 생성</h1>
+
+    <div style="display: flex; flex-direction: column; gap: 20px;">
+        <!-- 프롬프트 입력 -->
+        <form th:action="@{/images/generate}" method="post">
+            <input type="text" name="prompt" style="width: 300px;" placeholder="프롬프트 입력" required />
+            <button type="submit">이미지 생성</button>
+        </form>
+
+        <!-- 결과 미리보기 & 저장 -->
+        <div th:if="${result}">
+            <p>확장 프롬프트: <span th:text="${result.enhancedPrompt}"></span></p>
+            <div>
+                <img th:src="'data:image/png;base64,' + ${result.base64Image}" style="max-width: 300px;" />
+            </div>
+            <form th:action="@{/images/save}" method="post">
+                <input type="hidden" name="prompt" th:value="${result.prompt}" />
+                <input type="hidden" name="enhancedPrompt" th:value="${result.enhancedPrompt}" />
+                <input type="hidden" name="base64Image" th:value="${result.base64Image}" />
+                <input type="hidden" name="seed" th:value="${result.seed}" />
+                <button type="submit">선택 저장</button>
+            </form>
+        </div>
+        <p th:if="${message}" th:text="${message}" style="color: green;"></p>
+    </div>
+</body>
+</html>

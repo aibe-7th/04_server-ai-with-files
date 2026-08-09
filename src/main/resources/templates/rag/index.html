@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>PDF RAG</title>
+</head>
+<body>
+    <a th:href="@{/}">← 홈</a>
+    <h1>1부: PDF RAG</h1>
+
+    <div style="display: flex; flex-direction: column; gap: 20px;">
+        <!-- 업로드 폼 -->
+        <form th:action="@{/rag/documents}" method="post" enctype="multipart/form-data">
+            <input type="file" name="file" accept="application/pdf" required />
+            <button type="submit">업로드</button>
+        </form>
+        <p th:if="${message}" th:text="${message}" style="color: green;"></p>
+        <p th:if="${error}" th:text="${error}" style="color: red;"></p>
+
+        <!-- 질문 폼 -->
+        <form th:action="@{/rag/ask}" method="post">
+            <input type="text" name="question" style="width: 300px;" th:value="${question}" placeholder="질문 입력" required />
+            <button type="submit">질문</button>
+        </form>
+
+        <!-- 답변 및 근거 -->
+        <div th:if="${answer}">
+            <h3>답변: <span th:text="${answer}"></span></h3>
+            <h4>근거 문서:</h4>
+            <ul>
+                <li th:each="source : ${sources}">
+                    <span th:text="${source.metadata['fileName']}"></span>
+                    <p th:text="${source.text}"></p>
+                </li>
+            </ul>
+        </div>
+    </div>
+</body>
+</html>
