@@ -201,20 +201,22 @@ public class ObjectStorageService {
 
 #### `MediaDownloadController.java`
 ```java
-// [Step 0-4] S3 퍼블릭 URL 대신 자체 컨트롤러(프록시) 방식으로 미디어를 내려주는 다운로드 컨트롤러
+// [Step 0-4] S3 퍼블릭 URL 대신 클린 RESTful URL 프록시 방식으로 미디어를 내려주는 다운로드 컨트롤러
 @RestController
 @RequiredArgsConstructor
 public class MediaDownloadController {
 
     private final ObjectStorageService objectStorageService;
 
-    @GetMapping("/media/download")
-    public ResponseEntity<InputStreamResource> downloadMedia(@RequestParam("key") String key) {
-        InputStream inputStream = objectStorageService.downloadStream(key);
+    // 클린 URL 방식 (예: GET /media/uploads/uuid_filename.jpg)
+    @GetMapping("/media/{*key}")
+    public ResponseEntity<InputStreamResource> downloadMedia(@PathVariable("key") String key) {
+        String cleanKey = key.startsWith("/") ? key.substring(1) : key;
+        InputStream inputStream = objectStorageService.downloadStream(cleanKey);
         InputStreamResource resource = new InputStreamResource(inputStream);
 
         return ResponseEntity.ok()
-                .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"%s\"".formatted(key))
+                .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"%s\"".formatted(cleanKey))
                 .contentType(MediaType.IMAGE_JPEG)
                 .body(resource);
     }

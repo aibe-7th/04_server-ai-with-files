@@ -44,15 +44,16 @@ public class ImageSearchService {
             String key = (String) doc.getMetadata().get("objectKey");
 
             /*
-             * [S3 퍼블릭 버킷 전용 직접 URL 방식 흔적]
-             * String publicUrl = objectStorageService.getUrl(key);
+             * [이전 방식 주석 흔적]
+             * 1) S3 퍼블릭 직접 URL: String url = objectStorageService.getUrl(key);
+             * 2) 쿼리파라미터 프록시 URL: String url = "/media/download?key=%s".formatted(key);
              */
 
-            // 자체 컨트롤러(프록시) 방식 URL 생성 (비공개 버킷 보안 지원)
-            String proxyUrl = "/media/download?key=%s".formatted(key);
+            // 클린 RESTful URL 방식 (예: /media/uploads/uuid_filename.jpg)
+            String cleanUrl = "/media/%s".formatted(key);
 
             return new ImageSearchResult(
-                    proxyUrl,
+                    cleanUrl,
                     (String) doc.getMetadata().get("caption"),
                     (String) doc.getMetadata().get("ocrText"),
                     doc.getScore()
